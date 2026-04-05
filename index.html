@@ -506,12 +506,55 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- Token Configuration Modal -->
+    <div id="tokenModal" class="modal active">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>GitHub Setup Required</h2>
+            </div>
+            <div style="padding: 20px;">
+                <p style="margin-bottom: 16px; color: var(--text-secondary);">
+                    To use Team Project Manager, you need to provide your GitHub Personal Access Token.
+                </p>
+                <div class="form-group">
+                    <label>GitHub Personal Access Token</label>
+                    <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxx" style="font-family: monospace; letter-spacing: 1px;">
+                    <p style="font-size: 12px; color: var(--text-light); margin-top: 8px;">
+                        👉 <a href="https://github.com/settings/tokens/new" target="_blank" style="color: var(--primary);">Generate a token here</a> with 'repo' scope
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    <label>Repository Owner (usually your GitHub username)</label>
+                    <input type="text" id="ownerInput" placeholder="outlawtwincoder" value="outlawtwincoder">
+                </div>
+
+                <div class="form-group">
+                    <label>Repository Name</label>
+                    <input type="text" id="repoInput" placeholder="Team-Project-Manager" value="Team-Project-Manager">
+                </div>
+
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="saveTokenCheckbox">
+                    <span style="font-size: 14px;">Remember token in this browser (LocalStorage)</span>
+                </label>
+
+                <button class="btn-primary" style="width: 100%; margin-top: 20px;" onclick="initializeToken()">Connect to GitHub</button>
+
+                <p style="font-size: 12px; color: var(--text-light); margin-top: 16px; text-align: center;">
+                    Your token is only stored locally in your browser and never sent to any server except GitHub API.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="mainContainer" style="display: none;">
         <header>
             <h1>📋 Team Project Manager</h1>
             <div class="header-actions">
                 <button class="btn-primary" onclick="openCreateModal()">+ New Project</button>
                 <button onclick="syncWithGitHub()">🔄 Sync</button>
+                <button onclick="resetToken()">🔐 Change Token</button>
             </div>
         </header>
 
@@ -604,18 +647,79 @@
 
     <script>
         // Configuration
-        const GITHUB_TOKEN = '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';
-        const REPO_OWNER = 'outlawtwincoder';
-        const REPO_NAME = 'Team-Project-Manager';
+        let GITHUB_TOKEN = '';
+        let REPO_OWNER = '';
+        let REPO_NAME = '';
 
         let projects = [];
         let currentProject = null;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            loadProjects();
+            loadSavedToken();
             document.getElementById('projectForm').addEventListener('submit', createProject);
         });
+
+        function loadSavedToken() {
+            const saved = localStorage.getItem('github-token');
+            const owner = localStorage.getItem('github-owner');
+            const repo = localStorage.getItem('github-repo');
+
+            if (saved && owner && repo) {
+                GITHUB_TOKEN = saved;
+                REPO_OWNER = owner;
+                REPO_NAME = repo;
+                initializeApp();
+            } else {
+                showTokenModal();
+            }
+        }
+
+        function showTokenModal() {
+            document.getElementById('tokenModal').classList.add('active');
+            document.getElementById('mainContainer').style.display = 'none';
+        }
+
+        function initializeToken() {
+            const token = document.getElementById('tokenInput').value.trim();
+            const owner = document.getElementById('ownerInput').value.trim();
+            const repo = document.getElementById('repoInput').value.trim();
+
+            if (!token || !owner || !repo) {
+                showMessage('All fields are required', 'error');
+                return;
+            }
+
+            if (!token.startsWith('ghp_')) {
+                showMessage('Invalid token format. Should start with "ghp_"', 'error');
+                return;
+            }
+
+            GITHUB_TOKEN = token;
+            REPO_OWNER = owner;
+            REPO_NAME = repo;
+
+            if (document.getElementById('saveTokenCheckbox').checked) {
+                localStorage.setItem('github-token', token);
+                localStorage.setItem('github-owner', owner);
+                localStorage.setItem('github-repo', repo);
+            }
+
+            document.getElementById('tokenModal').classList.remove('active');
+            initializeApp();
+        }
+
+        function resetToken() {
+            localStorage.removeItem('github-token');
+            localStorage.removeItem('github-owner');
+            localStorage.removeItem('github-repo');
+            showTokenModal();
+        }
+
+        function initializeApp() {
+            document.getElementById('mainContainer').style.display = 'block';
+            loadProjects();
+        }
 
         async function loadProjects() {
             try {
