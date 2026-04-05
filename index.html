@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Project Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #1e40af;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --secondary: #6b7280;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --bg-tertiary: #f3f4f6;
+            --border: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --text-light: #9ca3af;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary: #3b82f6;
+                --primary-dark: #1e40af;
+                --success: #10b981;
+                --warning: #f59e0b;
+                --danger: #ef4444;
+                --secondary: #9ca3af;
+                --bg-primary: #1f2937;
+                --bg-secondary: #111827;
+                --bg-tertiary: #374151;
+                --border: #4b5563;
+                --text-primary: #f3f4f6;
+                --text-secondary: #d1d5db;
+                --text-light: #9ca3af;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--primary);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"], select {
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 14px;
+            flex: 1;
+        }
+
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .project-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .project-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .project-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-review {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-approved {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .project-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .project-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 12px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .priority-high {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .priority-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .priority-low {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .project-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-light);
+            padding: 0;
+            width: 32px;
+            height: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .comments-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .comments-section h3 {
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+
+        .comment {
+            margin-bottom: 16px;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .comment-date {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+
+        .comment-text {
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .comment-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .approval-section {
+            background: var(--bg-secondary);
+            padding: 16px;
+            border-radius: 6px;
+            margin: 16px 0;
+        }
+
+        .approval-status {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .approval-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            border: 1px solid #fecaca;
+        }
+
+        .success {
+            background: #dcfce7;
+            color: #166534;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            border: 1px solid #bbf7d0;
+        }
+
+        .assignees {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .assignee {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 768px) {
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                width: 95%;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                width: 100%;
+            }
+
+            .header-actions button {
+                flex: 1;
+            }
+
+            .search-bar {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📋 Team Project Manager</h1>
+            <div class="header-actions">
+                <button class="btn-primary" onclick="openCreateModal()">+ New Project</button>
+                <button onclick="syncWithGitHub()">🔄 Sync</button>
+            </div>
+        </header>
+
+        <div id="messageContainer"></div>
+
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search projects..." onkeyup="filterProjects()">
+            <select id="statusFilter" onchange="filterProjects()">
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="review">In Review</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+            </select>
+            <select id="priorityFilter" onchange="filterProjects()">
+                <option value="">All Priority</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+            </select>
+        </div>
+
+        <div id="projectsContainer" class="projects-grid"></div>
+    </div>
+
+    <!-- Create/Edit Project Modal -->
+    <div id="createModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Project</h2>
+                <button class="close-btn" onclick="closeCreateModal()">×</button>
+            </div>
+            <form id="projectForm">
+                <div class="form-group">
+                    <label>Project Title</label>
+                    <input type="text" id="projectTitle" placeholder="Enter project title" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="projectDescription" placeholder="Describe the project..."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Priority</label>
+                        <select id="projectPriority">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Deadline</label>
+                        <input type="date" id="projectDeadline">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Assign To (comma separated usernames)</label>
+                    <input type="text" id="projectAssignees" placeholder="username1, username2">
+                </div>
+
+                <div class="form-group">
+                    <label>Tags (comma separated)</label>
+                    <input type="text" id="projectTags" placeholder="tag1, tag2, tag3">
+                </div>
+
+                <div style="display: flex; gap: 8px;">
+                    <button type="submit" class="btn-primary" style="flex: 1;">Create Project</button>
+                    <button type="button" onclick="closeCreateModal()" style="flex: 1;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Project Details Modal -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="detailsTitle"></h2>
+                <button class="close-btn" onclick="closeDetailsModal()">×</button>
+            </div>
+
+            <div id="detailsContent">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const GITHUB_TOKEN = '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';
+        const REPO_OWNER = 'outlawtwincoder';
+        const REPO_NAME = 'Team-Project-Manager';
+
+        let projects = [];
+        let currentProject = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProjects();
+            document.getElementById('projectForm').addEventListener('submit', createProject);
+        });
+
+        async function loadProjects() {
+            try {
+                showMessage('Loading projects...', 'info');
+                const response = await fetch(
+                    `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues?state=all&per_page=100`,
+                    {
+                        headers: {
+                            'Authorization': `token ${GITHUB_TOKEN}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    }
+                );
+
+                if (!response.ok) throw new Error('Failed to load projects');
+
+                projects = await response.json();
+                renderProjects(projects);
+                showMessage('Projects loaded successfully', 'success');
+            } catch (error) {
+                showMessage('Error loading projects: ' + error.message, 'error');
+                console.error(error);
+            }
+        }
+
+        function renderProjects(projectList) {
+            const container = document.getElementById('projectsContainer');
+
+            if (projectList.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <h3>No projects yet</h3>
+                        <p>Create your first project to get started</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = projectList.map(project => {
+                const metadata = parseProjectMetadata(project.body);
+                const status = project.state === 'closed' ? 'approved' : metadata.status || 'pending';
+                const priority = metadata.priority || 'medium';
+                const tags = metadata.tags || [];
+
+                return `
+                    <div class="project-card" onclick="openDetailsModal(${project.number})">
+                        <div class="project-header">
+                            <h3 class="project-title">${escapeHtml(project.title)}</h3>
+                            <span class="status-badge status-${status}">${status.toUpperCase()}</span>
+                        </div>
+
+                        <p class="project-description">${escapeHtml(metadata.description || '')}</p>
+
+                        <div class="tags">
+                            <span class="tag priority-${priority}">⚡ ${priority.charAt(0).toUpperCase() + priority.slice(1)}</span>
+                            ${tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
+                        </div>
+
+                        <div class="project-meta">
+                            ${metadata.deadline ? `<div class="meta-item">📅 ${metadata.deadline}</div>` : ''}
+                            ${metadata.assignees && metadata.assignees.length > 0 ? `<div class="meta-item">👥 ${metadata.assignees.length}</div>` : ''}
+                            <div class="meta-item">💬 ${project.comments}</div>
+                        </div>
+
+                        <div class="project-footer">
+                            <span>By ${project.user.login}</span>
+                            <span>${new Date(project.created_at).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function openDetailsModal(issueNumber) {
+            try {
+                const project = projects.find(p => p.number === issueNumber);
+                if (!project) return;
+
+                currentProject = project;
+                const metadata = parseProjectMetadata(project.body);
+
+                let detailsHTML = `
+                    <div class="approval-section">
+                        <div class="approval-status">Status: <strong>${metadata.status || 'Pending'}</strong></div>
+                        <div class="approval-buttons">
+                            <button class="btn-primary btn-small" onclick="updateProjectStatus('review')">Move to Review</button>
+                            <button style="background: #dcfce7; color: #166534;" class="btn-small" onclick="updateProjectStatus('approved')">Approve</button>
+                            <button style="background: #fee2e2; color: #991b1b;" class="btn-small" onclick="updateProjectStatus('rejected')">Reject</button>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <h3>Details</h3>
+                        <p><strong>Description:</strong> ${escapeHtml(metadata.description || 'No description')}</p>
+                        ${metadata.priority ? `<p><strong>Priority:</strong> ${metadata.priority.toUpperCase()}</p>` : ''}
+                        ${metadata.deadline ? `<p><strong>Deadline:</strong> ${metadata.deadline}</p>` : ''}
+                        ${metadata.assignees && metadata.assignees.length > 0 ? `<p><strong>Assignees:</strong> ${metadata.assignees.join(', ')}</p>` : ''}
+                        ${metadata.tags && metadata.tags.length > 0 ? `<p><strong>Tags:</strong> ${metadata.tags.join(', ')}</p>` : ''}
+                    </div>
+
+                    <div class="comments-section">
+                        <h3>Comments (${project.comments})</h3>
+                        <div id="commentsList"></div>
+
+                        <div style="margin-top: 16px;">
+                            <textarea id="newComment" class="comment-input" placeholder="Add a comment..."></textarea>
+                            <button class="btn-primary" style="width: 100%; margin-top: 8px;" onclick="addComment()">Add Comment</button>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('detailsTitle').textContent = project.title;
+                document.getElementById('detailsContent').innerHTML = detailsHTML;
+
+                // Load comments
+                await loadComments(issueNumber);
+
+                document.getElementById('detailsModal').classList.add('active');
+            } catch (error) {
+                showMessage('Error opening project: ' + error.message, 'error');
+            }
+        }
+
+        async function loadComments(issueNumber) {
+            try {
+                const response = await fetch(
+                    `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues/${issueNumber}/comments`,
+                    {
+                        headers: {
+                            'Authorization': `token ${GITHUB_TOKEN}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    }
+                );
+
+                const comments = await response.json();
+                const commentsList = document.getElementById('commentsList');
+
+                if (comments.length === 0) {
+                    commentsList.innerHTML = '<p style="color: var(--text-light); font-size: 14px;">No comments yet</p>';
+                    return;
+                }
+
+                commentsList.innerHTML = comments.map(comment => `
+                    <div class="comment">
+                        <div class="comment-author">${comment.user.login}</div>
+                        <div class="comment-date">${new Date(comment.created_at).toLocaleString()}</div>
+                        <div class="comment-text">${escapeHtml(comment.body)}</div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading comments:', error);
+            }
+        }
+
+        async function addComment() {
+            const commentText = document.getElementById('newComment').value.trim();
+            if (!commentText || !currentProject) return;
+
+            try {
+                showMessage('Adding comment...', 'info');
+
+                const response = await fetch(
+                    `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues/${currentProject.number}/comments`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `token ${GITHUB_TOKEN}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        },
+                        body: JSON.stringify({ body: commentText })
+                    }
+                );
+
+                if (!response.ok) throw new Error('Failed to add comment');
+
+                document.getElementById('newComment').value = '';
+                await loadComments(currentProject.number);
+                showMessage('Comment added', 'success');
+            } catch (error) {
+                showMessage('Error adding comment: ' + error.message, 'error');
+            }
+        }
+
+        async function createProject(e) {
+            e.preventDefault();
+
+            const title = document.getElementById('projectTitle').value.trim();
+            const description = document.getElementById('projectDescription').value.trim();
+            const priority = document.getElementById('projectPriority').value;
+            const deadline = document.getElementById('projectDeadline').value;
+            const assignees = document.getElementById('projectAssignees').value.split(',').map(a => a.trim()).filter(a => a);
+            const tags = document.getElementById('projectTags').value.split(',').map(t => t.trim()).filter(t => t);
+
+            if (!title) {
+                showMessage('Project title is required', 'error');
+                return;
+            }
+
+            try {
+                showMessage('Creating project...', 'info');
+
+                const body = `${description}
+
+---
+**Metadata:**
+- Status: pending
+- Priority: ${priority}
+- Deadline: ${deadline || 'None'}
+- Assignees: ${assignees.join(', ') || 'None'}
+- Tags: ${tags.join(', ') || 'None'}`;
+
+                const response = await fetch(
+                    `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `token ${GITHUB_TOKEN}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        },
+                        body: JSON.stringify({
+                            title: title,
+                            body: body,
+                            labels: [priority, ...tags]
+                        })
+                    }
+                );
+
+                if (!response.ok) throw new Error('Failed to create project');
+
+                showMessage('Project created successfully', 'success');
+                closeCreateModal();
+                document.getElementById('projectForm').reset();
+                await loadProjects();
+            } catch (error) {
+                showMessage('Error creating project: ' + error.message, 'error');
+            }
+        }
+
+        async function updateProjectStatus(newStatus) {
+            if (!currentProject) return;
+
+            try {
+                showMessage('Updating status...', 'info');
+
+                const body = currentProject.body.replace(
+                    /- Status: \w+/,
+                    `- Status: ${newStatus}`
+                );
+
+                const response = await fetch(
+                    `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues/${currentProject.number}`,
+                    {
+                        method: 'PATCH',
+                        headers: {
+                            'Authorization': `token ${GITHUB_TOKEN}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        },
+                        body: JSON.stringify({ body: body })
+                    }
+                );
+
+                if (!response.ok) throw new Error('Failed to update status');
+
+                showMessage('Status updated', 'success');
+                await loadProjects();
+                await openDetailsModal(currentProject.number);
+            } catch (error) {
+                showMessage('Error updating status: ' + error.message, 'error');
+            }
+        }
+
+        function parseProjectMetadata(body) {
+            const metadata = {
+                description: '',
+                status: 'pending',
+                priority: 'medium',
+                deadline: '',
+                assignees: [],
+                tags: []
+            };
+
+            if (!body) return metadata;
+
+            const lines = body.split('\n');
+            let inMetadata = false;
+
+            for (let line of lines) {
+                if (line.includes('**Metadata:**')) {
+                    inMetadata = true;
+                    continue;
+                }
+
+                if (inMetadata && line.startsWith('-')) {
+                    if (line.includes('Status:')) {
+                        metadata.status = line.split('Status:')[1].trim();
+                    } else if (line.includes('Priority:')) {
+                        metadata.priority = line.split('Priority:')[1].trim();
+                    } else if (line.includes('Deadline:')) {
+                        metadata.deadline = line.split('Deadline:')[1].trim();
+                    } else if (line.includes('Assignees:')) {
+                        const assigneesStr = line.split('Assignees:')[1].trim();
+                        if (assigneesStr !== 'None') {
+                            metadata.assignees = assigneesStr.split(',').map(a => a.trim());
+                        }
+                    } else if (line.includes('Tags:')) {
+                        const tagsStr = line.split('Tags:')[1].trim();
+                        if (tagsStr !== 'None') {
+                            metadata.tags = tagsStr.split(',').map(t => t.trim());
+                        }
+                    }
+                }
+
+                if (!inMetadata && !line.includes('**Metadata:**')) {
+                    metadata.description = line;
+                }
+            }
+
+            return metadata;
+        }
+
+        function filterProjects() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const priorityFilter = document.getElementById('priorityFilter').value;
+
+            const filtered = projects.filter(project => {
+                const metadata = parseProjectMetadata(project.body);
+                const status = project.state === 'closed' ? 'approved' : metadata.status || 'pending';
+                const priority = metadata.priority || 'medium';
+
+                const matchesSearch = project.title.toLowerCase().includes(searchTerm) ||
+                    metadata.description.toLowerCase().includes(searchTerm);
+                const matchesStatus = !statusFilter || status === statusFilter;
+                const matchesPriority = !priorityFilter || priority === priorityFilter;
+
+                return matchesSearch && matchesStatus && matchesPriority;
+            });
+
+            renderProjects(filtered);
+        }
+
+        function openCreateModal() {
+            document.getElementById('createModal').classList.add('active');
+        }
+
+        function closeCreateModal() {
+            document.getElementById('createModal').classList.remove('active');
+        }
+
+        function closeDetailsModal() {
+            document.getElementById('detailsModal').classList.remove('active');
+            currentProject = null;
+        }
+
+        async function syncWithGitHub() {
+            showMessage('Syncing...', 'info');
+            await loadProjects();
+        }
+
+        function showMessage(message, type = 'info') {
+            const container = document.getElementById('messageContainer');
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = message;
+            container.appendChild(div);
+
+            setTimeout(() => {
+                div.remove();
+            }, 4000);
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+    </script>
+</body>
+</html>
